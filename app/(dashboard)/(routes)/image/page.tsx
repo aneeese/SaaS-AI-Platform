@@ -24,9 +24,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { useProModal } from "@/hooks/use-pro-modal";
+
 import { amountOptions, formSchema, resolutionOptions } from "./constant";
+import { toast } from "react-hot-toast";
 
 const PhotoPage = () => {
+  const proModal = useProModal();
   const router = useRouter();
   const [photos, setPhotos] = useState<string[]>([]);
 
@@ -51,7 +55,13 @@ const PhotoPage = () => {
 
       setPhotos(urls);
     } catch (error: any) {
-      console.log(error);
+      if (error?.response?.status === 403) {
+        proModal.onOpen();
+        form.reset();
+      } else {
+        console.log(error);
+        toast.error("Something went wrong!")
+      }
     } finally {
       router.refresh();
     }

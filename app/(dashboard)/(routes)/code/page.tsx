@@ -20,12 +20,16 @@ import { Loader } from "@/components/loader";
 import { UserAvatar } from "@/components/user-avatar";
 import { BotAvatar } from "@/components/bot-avatar";
 
+import { useProModal } from "@/hooks/use-pro-modal";
+
 import { formSchema } from "./constant";
 import { cn } from "@/lib/utils";
+import { toast } from "react-hot-toast";
 
 const CodePage = () => {
   const router = useRouter();
   const [messages, setMessages] = useState<ChatCompletionRequestMessage[]>([]);
+  const proModal = useProModal();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -52,7 +56,13 @@ const CodePage = () => {
 
       form.reset();
     } catch (error: any) {
-      console.log(error);
+      if (error?.response?.status === 403) {
+        proModal.onOpen();
+        form.reset();
+      } else {
+        console.log(error);
+        toast.error("Something went wrong!")
+      }
     } finally {
       router.refresh();
     }
